@@ -1,0 +1,26 @@
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api/users/';
+
+const getAllUsers = () => {
+  return axios.get(API_URL, { headers: authHeader() });
+};
+
+const createUser = (user) => {
+  return axios.post(API_URL, user, { headers: authHeader() });
+};
+
+const updateUser = (id, user) => {
+  return axios.put(API_URL + id, user, { headers: authHeader() });
+};
+
+const deleteUser = (id) => {
+  return axios.delete(API_URL + id, { headers: authHeader() });
+};
+
+export default {
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+};
