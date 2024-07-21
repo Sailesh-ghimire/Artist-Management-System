@@ -1,106 +1,77 @@
-// import React, { useState, useEffect } from 'react';
-// import { useReactTable  } from '@tanstack/react-table';
-// import userService from '../services/userService';
-
-// const UserTable = () => {
-//   const [data, setData] = useState([]);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const response = await userService.getAllUsers();
-//         setData(response.data);
-//       } catch (err) {
-//         console.error('Failed to fetch users:', err);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
-
-//   const columns = [
-//     { Header: 'ID', accessor: 'id' },
-//     { Header: 'First Name', accessor: 'first_name' },
-//     { Header: 'Last Name', accessor: 'last_name' },
-//     { Header: 'Email', accessor: 'email' },
-//     { Header: 'Phone', accessor: 'phone' },
-//     { Header: 'DOB', accessor: 'dob' },
-//     { Header: 'Gender', accessor: 'gender' },
-//     { Header: 'Address', accessor: 'address' },
-//   ];
-
-//   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useReactTable ({
-//     columns,
-//     data,
-//   });
-
-
-
-//   return (
-//     <div className="p-6">
-//       <h2 className="text-2xl font-bold mb-4">Users</h2>
-//       <table {...getTableProps()} className="min-w-full bg-white border border-gray-300">
-//         <thead>
-//           {headerGroups.map(headerGroup => (
-//             <tr {...headerGroup.getHeaderGroupProps()}>
-//               {headerGroup.headers.map(column => (
-//                 <th {...column.getHeaderProps()} className="p-2 border-b border-gray-300">
-//                   {column.render('Header')}
-//                 </th>
-//               ))}
-//             </tr>
-//           ))}
-//         </thead>
-//         <tbody {...getTableBodyProps()}>
-//           {rows.map(row => {
-//             prepareRow(row);
-//             return (
-//               <tr {...row.getRowProps()}>
-//                 {row.cells.map(cell => (
-//                   <td {...cell.getCellProps()} className="p-2 border-b border-gray-300">
-//                     {cell.render('Cell')}
-//                   </td>
-//                 ))}
-//               </tr>
-//             );
-//           })}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// };
-
-// export default UserTable;
-
 import React, { useEffect, useState } from 'react';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
-import axios from 'axios';
 import userService from '../services/userService';
-
 
 const UserTable = () => {
   const [data, setData] = useState([]);
-console.log(data)
-  // Fetch data from API
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.get('http://localhost:5000/api/users');
-  //       setData(response.data);
-  //     } catch (err) {
-  //       console.error('Error fetching user data:', err);
-  //     }
-  //   };
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  //   fetchData();
+
+  // useEffect(() => {
+  //   userService.getAllUsers().then((res) => {
+  //     const enhancedData = res.data.map(user => ({
+  //       ...user,
+  //       // action: `Action on ${user.id}`, // Manually adding the "action" property
+  //       deleteButton: (
+  //         <button onClick={() => handleDeleteButtonClick(user.id)}>Delete</button>
+  //       ),
+  //     }));
+  //     setData(enhancedData);
+  //   });
   // }, []);
 
   useEffect(() => {
-    userService.getAllUsers().then((res) => {
-      setData(res.data);
-    });
-  }, []);
+    fetchData(currentPage);
+  }, [currentPage]);
+
+  const fetchData = async (page) => {
+    try {
+      const res = await userService.getAllUsers(page);
+      const enhancedData = res.data.users.map(user => ({
+        ...user,
+        deleteButton: (
+          <button 
+            onClick={() => handleDeleteButtonClick(user.id)}
+            className="p-1 text-red-600 border border-red-600 rounded"
+          >
+            Delete
+          </button>
+        ),
+      }));
+      setData(enhancedData);
+      setTotalPages(res.data.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  };
+
+  // const handleDeleteButtonClick = async (id) => {
+  //   try {
+  //     await userService.deleteUser(id);
+  //     userService.getAllUsers().then(updatedUsers => {
+  //       const newData = updatedUsers.data.map(user => ({
+  //         ...user,
+  //         deleteButton: (
+  //           <button onClick={() => handleDeleteButtonClick(user.id)}>Delete</button>
+  //         ),
+  //       }));
+  //       setData(newData); 
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to delete user:", error);
+  //     // Handle error, e.g., show an error message
+  //   }
+  // };
+
+  const handleDeleteButtonClick = async (id) => {
+    try {
+      await userService.deleteUser(id);
+      fetchData(currentPage); // Refresh data after deletion
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
 
 
   // Define columns
@@ -113,9 +84,22 @@ console.log(data)
       { accessorKey: 'phone', header: 'Phone' },
       { accessorKey: 'dob', header: 'Date of Birth' },
       { accessorKey: 'gender', header: 'Gender' },
+      // { accessorKey: 'action', header: 'Actions' },
+      { accessorKey: 'deleteButton', header: 'Actions', cell: props => props.value }, // Display the delete button
+      // {
+      //   id: 'actions',
+      //   header: 'Actions',
+      //   cell: ({ row }) => (
+      //     <div className="flex space-x-2">
+      //       {row.original.deleteButton}
+      //     </div>
+      //   ),
+      // },
     ],
     []
   );
+
+  
 
   // Initialize the table
   const table = useReactTable({
@@ -123,6 +107,15 @@ console.log(data)
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+
+  const nextPage = () => {
+    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+  };
+
+  const prevPage = () => {
+    setCurrentPage(prevPage => Math.max(prevPage - 1, 1)); // Prevent going below page 1
+  };
 
   return (
     <div className="p-6">
@@ -158,6 +151,23 @@ console.log(data)
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          className="p-2 bg-gray-200 rounded"
+        >
+          Previous
+        </button>
+        <span>{currentPage}</span>
+        <button
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+          className="p-2 bg-gray-200 rounded"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

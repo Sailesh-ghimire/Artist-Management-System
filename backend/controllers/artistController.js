@@ -10,6 +10,41 @@ exports.getAllArtists = async (req, res) => {
   }
 };
 
+
+exports.getAllArtists = async (req, res) => {
+  try {
+    const { page = 1, limit = 5 } = req.query;
+    const offset = (page - 1) * limit;
+    const sqlQuery = 'SELECT * FROM artists ORDER BY id LIMIT $1 OFFSET $2';
+    const artists = await pool.query(sqlQuery, [limit, offset]);
+
+    if (!artists.rows) {
+      throw new Error('No artists found');
+    }
+
+    const countResult = await pool.query('SELECT COUNT(*) FROM artists');
+    
+    // Ensure countResult has rows and count is present
+    if (!countResult.rows || countResult.rows.length === 0) {
+      throw new Error('Unable to get artists count');
+    }
+
+    const totalArtists = countResult.rows[0].count;
+    const totalPages = Math.ceil(totalArtists / limit);
+    
+    const response = {
+      artists: artists.rows,
+      currentPage: parseInt(page),
+      totalPages: totalPages,
+    };
+    
+    res.json(response);
+  } catch (err) {
+    console.error('Error fetching artists:', err.message);
+    res.status(500).send('Server error');
+  }
+};
+
 exports.createArtist = async (req, res) => {
   const { name, dob, gender, address, first_release_year, no_of_albums_released } = req.body;
 

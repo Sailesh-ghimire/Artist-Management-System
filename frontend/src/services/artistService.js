@@ -4,8 +4,11 @@ import { authHeader } from './auth-header';
 
 const API_URL = 'http://localhost:5000/api/artists/';
 
-const getAllArtists = () => {
-  return axios.get(API_URL, { headers: authHeader() });
+const getAllArtists = (page = 1, limit = 5) => {
+  return axios.get(API_URL, { 
+    headers: authHeader(),
+    params: { page, limit },
+   });
 };
 
 const createArtist = (artist) => {
