@@ -17,12 +17,16 @@ const getAllUsers = (page = 1, limit = 5) => {
 
 
 
-const createUser = (user) => {
-  return axios.post(API_URL, user, { headers: authHeader() });
+const createUser = async (userData) => {
+  const response = await axios.post(API_URL, userData, { headers: authHeader() });
+  return response.data;
 };
 
-const updateUser = (id, user) => {
-  return axios.put(API_URL + id, user, { headers: authHeader() });
+const updateUser = async (id, userData) => {
+  // const response = await axios.put(API_URL+id, userData, { headers: authHeader() });
+  const response = await axios.put(`${API_URL}/${id}`, userData, { headers: authHeader() });
+  console.log(`${API_URL}/${id}`)
+  return response.data;
 };
 
 const deleteUser = (id) => {

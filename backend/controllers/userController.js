@@ -1,4 +1,6 @@
 const pool = require('../db');
+const bcrypt = require('bcryptjs');
+
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -43,21 +45,51 @@ exports.createUser = async (req, res) => {
   }
 };
 
+// exports.updateUser = async (req, res) => {
+//   const { id } = req.params;
+//   const { first_name, last_name, email, phone, dob, gender, address } = req.body;
+
+//   try {
+//     const updatedUser = await pool.query(
+//       'UPDATE users SET first_name = $1, last_name = $2, email = $3, phone = $4, dob = $5, gender = $6, address = $7, updated_at = NOW() WHERE id = $8 RETURNING *',
+//       [first_name, last_name, email, phone, dob, gender, address, id]
+//     );
+//     res.json(updatedUser.rows[0]);
+//   } catch (err) {
+//     console.error(err.message);
+//     res.status(500).send('Server error');
+//   }
+// };
+
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
-  const { first_name, last_name, email, phone, dob, gender, address } = req.body;
+  const { password, phone } = req.body;
 
   try {
+    if (!password || !phone) {
+      return res.status(400).send('Password and phone number are required');
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const updatedUser = await pool.query(
-      'UPDATE users SET first_name = $1, last_name = $2, email = $3, phone = $4, dob = $5, gender = $6, address = $7, updated_at = NOW() WHERE id = $8 RETURNING *',
-      [first_name, last_name, email, phone, dob, gender, address, id]
+      'UPDATE users SET password = $1, phone = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+      [hashedPassword, phone, id]
     );
+
+    if (updatedUser.rows.length === 0) {
+      return res.status(404).send('User not found');
+    }
+
+
     res.json(updatedUser.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 };
+
+
 
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;

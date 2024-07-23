@@ -15,8 +15,18 @@ const createArtist = (artist) => {
   return axios.post(API_URL, artist, { headers: authHeader() });
 };
 
-const updateArtist = (id, artist) => {
-  return axios.put(API_URL + id, artist, { headers: authHeader() });
+
+
+// const updateArtist = (id, artist) => {
+//   return axios.put(API_URL + id, artist, { headers: authHeader() });
+// };
+
+const updateArtist = async (id, artistData) => {
+  console.log("artistData", artistData)
+  // const response = await axios.put(API_URL+id, userData, { headers: authHeader() });
+  const response = await axios.put(API_URL+id, artistData, { headers: authHeader() });
+  // console.log(`${API_URL}/${id}`)
+  return response.data;
 };
 
 const deleteArtist = (id) => {

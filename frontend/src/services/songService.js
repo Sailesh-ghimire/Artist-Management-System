@@ -3,9 +3,10 @@ import { authHeader } from './auth-header';
 
 const API_URL = 'http://localhost:5000/api/songs';
 
-const getSongsByArtist = (artistId) => {
-  return axios.get(`${API_URL}/artist/${artistId}`);
-};
+    const getSongsByArtist = (artistId) => {
+      // return axios.get(`${API_URL}/artist/${artistId}`);
+      return axios.get(`${API_URL}/artists/${artistId}/songs`, { headers: authHeader()});
+    };
 
 const createSong = (songData) => {
   return axios.post(API_URL, songData);

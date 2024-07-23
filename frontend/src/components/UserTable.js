@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import userService from '../services/userService';
+import CreateUser from './createUser';
+import UpdateUser from './updateUser';
+import { ToastContainer, toast } from 'react-toastify';
 
 const UserTable = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [userTableKey, setUserTableKey] = useState(0);
+  const [selectedUser, setSelectedUser] = useState(null);
+  console.log(selectedUser)
 
-
-  // useEffect(() => {
-  //   userService.getAllUsers().then((res) => {
-  //     const enhancedData = res.data.map(user => ({
-  //       ...user,
-  //       // action: `Action on ${user.id}`, // Manually adding the "action" property
-  //       deleteButton: (
-  //         <button onClick={() => handleDeleteButtonClick(user.id)}>Delete</button>
-  //       ),
-  //     }));
-  //     setData(enhancedData);
-  //   });
-  // }, []);
+  const handleCreateUserClose = () => {
+    setShowCreateUserModal(false);
+  };
 
   useEffect(() => {
     fetchData(currentPage);
@@ -37,32 +34,26 @@ const UserTable = () => {
           >
             Delete
           </button>
+          
+        ),
+        updateButton: (
+          <button 
+            onClick={() => handleUpdateButtonClick(user.id)}
+            className="p-1 text-blue-600 border border-blue-600 rounded"
+          >
+            Update
+          </button>
         ),
       }));
       setData(enhancedData);
       setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error("Failed to fetch users:", error);
+      toast.error("Failed to fetch users");
+
     }
   };
 
-  // const handleDeleteButtonClick = async (id) => {
-  //   try {
-  //     await userService.deleteUser(id);
-  //     userService.getAllUsers().then(updatedUsers => {
-  //       const newData = updatedUsers.data.map(user => ({
-  //         ...user,
-  //         deleteButton: (
-  //           <button onClick={() => handleDeleteButtonClick(user.id)}>Delete</button>
-  //         ),
-  //       }));
-  //       setData(newData); 
-  //     });
-  //   } catch (error) {
-  //     console.error("Failed to delete user:", error);
-  //     // Handle error, e.g., show an error message
-  //   }
-  // };
 
   const handleDeleteButtonClick = async (id) => {
     try {
@@ -72,6 +63,13 @@ const UserTable = () => {
       console.error("Failed to delete user:", error);
     }
   };
+
+  const handleUpdateButtonClick = (id) => {
+    setSelectedUser(id);
+    fetchData(currentPage); // Refresh data after deletion
+
+  };
+
 
 
   // Define columns
@@ -86,15 +84,8 @@ const UserTable = () => {
       { accessorKey: 'gender', header: 'Gender' },
       // { accessorKey: 'action', header: 'Actions' },
       { accessorKey: 'deleteButton', header: 'Actions', cell: props => props.value }, // Display the delete button
-      // {
-      //   id: 'actions',
-      //   header: 'Actions',
-      //   cell: ({ row }) => (
-      //     <div className="flex space-x-2">
-      //       {row.original.deleteButton}
-      //     </div>
-      //   ),
-      // },
+      { accessorKey: 'updateButton', header: 'Actions', cell: props => props.value }, // Display the delete button
+      
     ],
     []
   );
@@ -117,9 +108,29 @@ const UserTable = () => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 1)); // Prevent going below page 1
   };
 
+  const handleUserCreated = () => {
+    // Trigger a re-render of UserTable by changing its key
+    fetchData(currentPage);  };
+
+
   return (
     <div className="p-6">
+            <ToastContainer />
+
       <h2 className="text-2xl font-bold mb-4">Users</h2>
+      <button
+        onClick={() => setShowCreateUserModal(true)}
+        className="mb-4 px-4 py-2 bg-green-500 text-white rounded"
+      >
+        Create User
+      </button>
+      {showCreateUserModal && <CreateUser onClose={handleCreateUserClose} onSubmit={handleUserCreated} />}
+
+      {selectedUser && (
+        <UpdateUser userId={selectedUser} onClose={() => setSelectedUser(null)} />
+      )}
+
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
