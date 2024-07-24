@@ -21,6 +21,7 @@ exports.getAllUsers = async (req, res) => {
       users: users.rows,
       currentPage: parseInt(page),
       totalPages: totalPages,
+      count: parseInt(totalUsers), 
     };
     
     res.json(response);

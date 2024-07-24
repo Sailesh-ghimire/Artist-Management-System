@@ -2,12 +2,13 @@ import axios from "axios";
 import { authHeader } from "./auth-header";
 
 
+const API_URL = 'http://localhost:5000/api/artists/';
 
 
 const csvExport = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/exportartists",
+        API_URL + 'exportcsv',
         {
           headers: {
             ...authHeader(),
@@ -36,8 +37,9 @@ const csvExport = async () => {
     formData.append("file", file);
 
     try {
-      await axios.post("http://localhost:5000/importartists", formData, {
+      await axios.post(API_URL + 'importcsv', formData, {
         headers: {
+          ...authHeader(),
           "Content-Type": "multipart/form-data",
         },
       });

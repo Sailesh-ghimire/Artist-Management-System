@@ -10,8 +10,7 @@ import authService from './services/authService';
 import UserTable from './components/UserTable';
 import ArtistTable from './components/ArtistTable';
 import Navbar from './components/Navbar';
-import SongTable from './components/SongTable';
-import ArtistSongsTable from './components/songByArtist'
+import SongTable from './components/SongTable'
 import ArtistCSVImportExport from './components/CSV';
 
 const App = () => {
@@ -74,7 +73,7 @@ return (
       <Route path="/" element={<PrivateRoute element={<Dashboard />} />} />
       <Route path="/users" element={<PrivateRoute element={<UserTable />} />} />
       <Route path="/artists" element={<PrivateRoute element={<ArtistTable />} />} />
-      <Route path="/songs/:id" element={<PrivateRoute element={<ArtistSongsTable />} />} />
+      <Route path="/songs/:id" element={<PrivateRoute element={<SongTable />} />} />
       <Route path="/csv" element={<PrivateRoute element={<ArtistCSVImportExport />} />}/>
 
     </Routes>

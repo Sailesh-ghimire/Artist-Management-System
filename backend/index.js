@@ -21,8 +21,8 @@ app.use('/api/artists', artistRoutes);
 app.use('/api/songs', songRoutes);
 
 
-app.get('/exportartists', exportArtistsToCSV);
-app.post('/importartists', upload.single('file'), importArtistsFromCSV);
+// app.get('/api/exportCSV', exportArtistsToCSV);
+// app.post('/api/importCSV', upload.single('file'), importArtistsFromCSV);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

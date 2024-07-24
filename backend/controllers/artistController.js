@@ -40,6 +40,7 @@ exports.getAllArtists = async (req, res) => {
       artists: artists.rows,
       currentPage: parseInt(page),
       totalPages: totalPages,
+      count: parseInt(totalArtists), 
     };
     
     res.json(response);

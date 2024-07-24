@@ -2,138 +2,162 @@ import React, { useState } from 'react';
 import userService from '../services/userService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { registerSchema } from '../validations/allValidations';
+import { z, ZodError } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 const CreateUser = ({ onClose, onSubmit }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('');
-  const [address, setAddress] = useState('');
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newUser = {
-      first_name: firstName,
-      last_name: lastName,
-      email,
-      password,
-      phone,
-      dob,
-      gender,
-      address,
-    };
-
+  const onSubmitHandler = async (data) => {
     try {
-      await userService.createUser(newUser);
-    //   alert('User created successfully');
-    toast.success('User created successfully');
-
+      await userService.createUser(data);
+      toast.success('User created successfully');
       onClose();
       onSubmit();
-      
     } catch (err) {
       console.error(err);
-      alert('Failed to create user');
+      toast.error('Failed to create user');
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-2xl mb-4">Create User</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
-          />
+    <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <h2 className="text-2xl font-bold text-white mb-6 text-center">
+        Create User
+      </h2>
+      <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="firstName">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              placeholder="First Name"
+              {...register('first_name')}
+              className={`border ${errors.firstName ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
+            />
+            {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName.message}</p>}
+          </div>
+          <div className="flex-1">
+            <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="lastName">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              placeholder="Last Name"
+              {...register('last_name')}
+              className={`border ${errors.lastName ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
+            />
+            {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName.message}</p>}
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="email">
+            Email
+          </label>
           <input
             type="email"
+            id="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
+            {...register('email')}
+            className={`border ${errors.email ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
           />
+          {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="password">
+            Password
+          </label>
           <input
             type="password"
+            id="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
+            {...register('password')}
+            className={`border ${errors.password ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
           />
-          <input
-            type="text"
-            placeholder="Phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
-          />
-          <input
-            type="date"
-            placeholder="Date of Birth"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
-          />
+          {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="phone">
+              Phone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              placeholder="Phone"
+              {...register('phone')}
+              className={`border ${errors.phone ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
+            />
+            {errors.phone && <p className="text-red-600 text-sm">{errors.phone.message}</p>}
+          </div>
+          <div className="flex-1">
+            <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="dob">
+              Date of Birth
+            </label>
+            <input
+              type="date"
+              id="dob"
+              placeholder="Date of Birth"
+              {...register('dob')}
+              className={`border ${errors.dob ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
+            />
+            {errors.dob && <p className="text-red-600 text-sm">{errors.dob.message}</p>}
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="gender">
+            Gender
+          </label>
           <select
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
+            id="gender"
+            {...register('gender')}
+            className={`border ${errors.gender ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
           >
             <option value="">Select Gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
+          {errors.gender && <p className="text-red-600 text-sm">{errors.gender.message}</p>}
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="address">
+            Address
+          </label>
           <textarea
+            id="address"
             placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
+            {...register('address')}
+            className={`border ${errors.address ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full h-16 resize-none`}
           ></textarea>
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={onClose}
-              onSubmit={onSubmit}
-              className="mr-2 px-4 py-2 bg-gray-500 text-white rounded"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-            >
-              Create
-            </button>
-          </div>
-        </form>
-      </div>
+          {errors.address && <p className="text-red-600 text-sm">{errors.address.message}</p>}
+        </div>
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+          >
+            Create
+          </button>
+        </div>
+      </form>
       <ToastContainer />
-
     </div>
   );
 };
-
 export default CreateUser;

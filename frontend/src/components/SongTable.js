@@ -1,113 +1,181 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
+import artistService from '../services/artistService';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useParams } from 'react-router-dom';
 import songService from '../services/songService';
+import CreateSong from './createSong';
+import UpdateSong from './updateSong';
 
-const SongTable = ({ artistId }) => {
-  const [songs, setSongs] = useState([]);
-  const [newSong, setNewSong] = useState({
-    artist_id: artistId,
-    title: '',
-    album_name: '',
-    genre: '',
-  });
+const ArtistSongsTable = () => {
+  const [data, setData] = useState([]);
+
+  const [showCreateSongModal, setShowCreateSongModal] = useState(false);
+  const handleCreateSongClose = () => {
+    setShowCreateSongModal(false);
+  };
+
+  const handleArtistCreated = () => {
+    // Trigger a re-render of UserTable by changing its key
+    // fetchData(currentPage);
+  };
+
+  const { id: artistId } = useParams(); // Extracting artistId from the URL
+
 
   useEffect(() => {
-    songService.getSongsByArtist(artistId).then((res) => {
-      setSongs(res.data);
-    });
+    const fetchData = async () => {
+      try {
+        const res = await artistService.getArtistSongs(artistId);
+console.log(res.data)
+        const enhancedData = res.data.map((song) => ({
+          ...song,
+          deleteButton: (
+            <button
+              onClick={() => handleDeleteButtonClick(song.id)}
+              className="p-1 hover:bg-red-600 border border-red-600 rounded"
+            >
+              Delete
+            </button>
+          ),
+          updateButton: (
+            <button
+              onClick={() => handleUpdateButtonClick(song.id)}
+              className="p-1 hover:bg-blue-600 border border-blue-600 rounded"
+            >
+              Update
+            </button>
+          ),
+        }));
+console.log(enhancedData)
+
+        setData(enhancedData);
+      } catch (error) {
+        console.error("Failed to fetch artist's songs:", error);
+        toast.error("Failed to fetch artist's songs");
+      }
+    };
+
+    fetchData();
   }, [artistId]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    songService.createSong(newSong).then((res) => {
-      setSongs([...songs, res.data]);
-      setNewSong({
-        artist_id: artistId,
-        title: '',
-        album_name: '',
-        genre: '',
-      });
-    });
+  const handleDeleteButtonClick = async (id) => {
+    try {
+      await songService.deleteSong(id);
+    } catch (error) {
+      console.error("Failed to delete artist:", error);
+    }
   };
 
-  const handleEdit = (song) => {
-    setNewSong(song);
+  const [selectedSong, setSelectedSong] = useState(null);
+
+  const handleUpdateButtonClick = (id) => {
+    setSelectedSong(id);
   };
 
-  const handleUpdate = (e) => {
-    e.preventDefault();
-    songService.updateSong(newSong.id, newSong).then((res) => {
-      const updatedSongs = songs.map((song) =>
-        song.id === res.data.id ? res.data : song
-      );
-      setSongs(updatedSongs);
-      setNewSong({
-        artist_id: artistId,
-        title: '',
-        album_name: '',
-        genre: '',
-      });
-    });
-  };
 
-  const handleDelete = (id) => {
-    songService.deleteSong(id).then(() => {
-      const updatedSongs = songs.filter((song) => song.id !== id);
-      setSongs(updatedSongs);
-    });
-  };
+
+  // Define columns
+  const columns = React.useMemo(
+    () => [
+      { accessorKey: 'id', header: 'ID' },
+      { accessorKey: 'title', header: 'Title' },
+      { accessorKey: 'album_name', header: 'Album Name' },
+      { accessorKey: 'genre', header: 'Genre' },
+      { accessorKey: 'created_at', header: 'Created At' },
+      { accessorKey: 'updated_at', header: 'Updated At' },
+      {
+        accessorKey: "deleteButton",
+        header: "Actions",
+        cell: (props) => props.value,
+      },
+      {
+        accessorKey: "updateButton",
+        header: "Actions",
+        cell: (props) => props.value,
+      },
+    ],
+    []
+  );
+
+  // Initialize the table
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+
+
+  const handleSongCreated = () => {
+    // Trigger a re-render of UserTable by changing its key
+console.log('refetch')  };
+
 
   return (
-    <div>
-      <h2>Songs</h2>
-      <form onSubmit={newSong.id ? handleUpdate : handleSubmit}>
-        <input
-          type="text"
-          placeholder="Title"
-          value={newSong.title}
-          onChange={(e) => setNewSong({ ...newSong, title: e.target.value })}
-          required
+    <div className="p-6 bg-gray-900 min-h-screen">
+      <h2 className="text-3xl font-bold text-white mb-6">Songs</h2>
+
+      <button
+        onClick={() => setShowCreateSongModal(true)}
+        className="mb-6 px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+      >
+        Create Song
+      </button>
+      {showCreateSongModal && (
+        <CreateSong
+          onClose={handleCreateSongClose}
+          onSubmit={handleSongCreated}
         />
-        <input
-          type="text"
-          placeholder="Album Name"
-          value={newSong.album_name}
-          onChange={(e) => setNewSong({ ...newSong, album_name: e.target.value })}
-          required
+      )}
+  
+
+  {selectedSong && (
+        <UpdateSong
+          songId={selectedSong}
+          onClose={() => setSelectedSong(null)}
         />
-        <input
-          type="text"
-          placeholder="Genre"
-          value={newSong.genre}
-          onChange={(e) => setNewSong({ ...newSong, genre: e.target.value })}
-          required
-        />
-        <button type="submit">{newSong.id ? 'Update' : 'Add'} Song</button>
-      </form>
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Album Name</th>
-            <th>Genre</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {songs.map((song) => (
-            <tr key={song.id}>
-              <td>{song.title}</td>
-              <td>{song.album_name}</td>
-              <td>{song.genre}</td>
-              <td>
-                <button onClick={() => handleEdit(song)}>Edit</button>
-                <button onClick={() => handleDelete(song.id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      )}
+
+
+      <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
+        <table className="min-w-full bg-gray-700 border border-gray-600 rounded-lg">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="bg-gray-600 text-white">
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="p-4 text-left text-sm font-medium border-b border-gray-500"
+                  >
+                    {header.column.columnDef.header}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="hover:bg-gray-600">
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="p-4 text-sm text-gray-200 border-b border-gray-600"
+                  >
+                    {cell.getValue()}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+  
+      
+      <ToastContainer />
     </div>
   );
 };
 
-export default SongTable;
+export default ArtistSongsTable;

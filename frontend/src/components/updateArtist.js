@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import artistService from '../services/artistService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useForm } from 'react-hook-form';
+import { z, ZodError } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { updateArtistSchema } from '../validations/allValidations';
+
 
 const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(updateArtistSchema),
+  });
 
-  const [no_of_albums_released, setNoOfAlbumsReleased] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const updatedArtist = {
-        no_of_albums_released
-      };
+  const onSubmit = async (data) => {
     try {
-      await artistService.updateArtist(artistId, updatedArtist);
+      await artistService.updateArtist(artistId, data);
       toast.success('Artist updated successfully');
       onClose();
       onUpdate(); // Call the onUpdate callback
@@ -25,17 +27,24 @@ const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-2xl mb-4">Update Artist</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="number"
-            placeholder="Number of Albums Released"
-            value={no_of_albums_released}
-            onChange={(e) => setNoOfAlbumsReleased(e.target.value)}
-            required
-            className="mb-2 p-2 border border-gray-300 rounded w-full"
-          />
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+          Update Artist
+        </h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="mb-4">
+            <label htmlFor="no_of_albums_released" className="block text-gray-300 text-sm font-medium mb-2">
+              Number of Albums Released
+            </label>
+            <input
+              type="number"
+              id="no_of_albums_released"
+              placeholder="Number of Albums Released"
+              {...register('no_of_albums_released')}
+              className={`border ${errors.no_of_albums_released ? 'border-red-600' : 'border-gray-600'} bg-gray-700 text-white p-2 rounded w-full`}
+            />
+            {errors.no_of_albums_released && <p className="text-red-600 text-sm">{errors.no_of_albums_released.message}</p>}
+          </div>
           <div className="flex justify-end">
             <button
               type="button"
@@ -57,5 +66,4 @@ const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
     </div>
   );
 };
-
 export default UpdateArtist;

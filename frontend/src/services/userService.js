@@ -24,7 +24,7 @@ const createUser = async (userData) => {
 
 const updateUser = async (id, userData) => {
   // const response = await axios.put(API_URL+id, userData, { headers: authHeader() });
-  const response = await axios.put(`${API_URL}/${id}`, userData, { headers: authHeader() });
+  const response = await axios.put(API_URL+id, userData, { headers: authHeader() });
   return response.data;
 };
 
