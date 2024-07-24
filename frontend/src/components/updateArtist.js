@@ -4,7 +4,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
-    console.log('artisttttt', artistId)
 
   const [no_of_albums_released, setNoOfAlbumsReleased] = useState('');
 

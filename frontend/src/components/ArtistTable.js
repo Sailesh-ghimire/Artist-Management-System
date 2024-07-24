@@ -123,8 +123,6 @@ const ArtistTable = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1)); // Prevent going below page 1
   };
 
-  console.log("Table rows:", table.getRowModel().rows); // Debugging line
-  console.log("Columns:", table.getHeaderGroups()); // Debugging line
 
   const [showCreateArtistModal, setShowCreateArtistModal] = useState(false);
   const handleCreateArtistClose = () => {

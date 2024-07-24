@@ -12,6 +12,7 @@ import ArtistTable from './components/ArtistTable';
 import Navbar from './components/Navbar';
 import SongTable from './components/SongTable';
 import ArtistSongsTable from './components/songByArtist'
+import ArtistCSVImportExport from './components/CSV';
 
 const App = () => {
 
@@ -74,6 +75,7 @@ return (
       <Route path="/users" element={<PrivateRoute element={<UserTable />} />} />
       <Route path="/artists" element={<PrivateRoute element={<ArtistTable />} />} />
       <Route path="/songs/:id" element={<PrivateRoute element={<ArtistSongsTable />} />} />
+      <Route path="/csv" element={<PrivateRoute element={<ArtistCSVImportExport />} />}/>
 
     </Routes>
   </div>

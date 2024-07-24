@@ -1,4 +1,8 @@
+const csvWriter = require('csv-writer').createObjectCsvStringifier;
 const pool = require('../db');
+const csv = require('csv-parser');
+const fs = require('fs');
+
 
 exports.getAllArtists = async (req, res) => {
   try {
@@ -99,6 +103,103 @@ exports.getArtistSongs = async (req, res) => {
   try {
     const songs = await pool.query('SELECT * FROM music WHERE artist_id = $1', [artist_id]);
     res.json(songs.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
+
+
+
+exports.exportArtistsToCSV = async (req, res) => {
+  try {
+    const artists = await pool.query('SELECT * FROM artists');
+    const csvStringifier = csvWriter({
+      header: [
+        { id: 'id', title: 'Artist ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'dob', title: 'Date of Birth' },
+        { id: 'gender', title: 'Gender' },
+        { id: 'address', title: 'Address' },
+        { id: 'first_release_year', title: 'First Release Year' },
+        { id: 'no_of_albums_released', title: 'No. of Albums Released' },
+      ]
+    });
+
+
+    const formattedArtists = artists.rows.map(artist => ({
+      ...artist,
+      dob: new Date(artist.dob).toISOString().split('T')[0], // Format to YYYY-MM-DD
+    }));
+
+    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(formattedArtists);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment('artists.csv');
+    // res.send(csvData);
+    res.send(Buffer.from(csvData, 'utf8'));
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
+// exports.importArtistsFromCSV = async (req, res) => {
+//   try {
+
+//     const results = [];
+//     fs.createReadStream(req.file.path)
+//       .pipe(csv())
+//       .on('data', (data) => results.push(data))
+//       .on('end', async () => {
+//         try {
+//           const promises = results.map(artist => {
+//             return pool.query(
+//               'INSERT INTO artists (name, dob, gender, address, first_release_year, no_of_albums_released) VALUES ($1, $2, $3, $4, $5, $6)',
+//               [artist.name, artist.dob, artist.gender, artist.address, artist.first_release_year, artist.no_of_albums_released]
+//             );
+//           });
+//           await Promise.all(promises);
+//           res.send('Artists imported successfully');
+//         } catch (err) {
+//           console.error(err.message);
+//           res.status(500).send('Server error');
+//         }
+//       });
+//   } catch (err) {
+//     console.error(err.message);
+//     res.status(500).send('Server error');
+//   }
+// };
+
+
+exports.importArtistsFromCSV = async (req, res) => {
+  try {
+    const file = req.file; // Assuming file is uploaded via multer
+    const results = [];
+
+    fs.createReadStream(file.path)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => {
+        // Process results
+        for (const artist of results) {
+          const { Name, 'Date of Birth': dob, Gender: gender, Address: address, 'First Release Year': first_release_year, 'No. of Albums Released': no_of_albums_released } = artist;
+          
+          
+          const dobFormatted = dob ? new Date(dob).toISOString() : null;
+          const firstReleaseYear = parseInt(first_release_year, 10) || null;
+          const noOfAlbumsReleased = parseInt(no_of_albums_released, 10) || null;
+
+          await pool.query(
+            'INSERT INTO artists (name, dob, gender, address, first_release_year, no_of_albums_released) VALUES ($1, $2, $3, $4, $5, $6)',
+            [Name, dobFormatted, gender, address, firstReleaseYear, noOfAlbumsReleased]
+          );
+        }
+        res.send('Artists imported successfully');
+      });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

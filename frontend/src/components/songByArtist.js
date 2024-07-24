@@ -8,7 +8,6 @@ import { useParams } from 'react-router-dom';
 const ArtistSongsTable = () => {
   const [data, setData] = useState([]);
   const { id: artistId } = useParams(); // Extracting artistId from the URL
-console.log("songid",artistId)
   useEffect(() => {
     const fetchData = async () => {
       try {

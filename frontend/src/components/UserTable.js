@@ -12,7 +12,6 @@ const UserTable = () => {
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [userTableKey, setUserTableKey] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
-  console.log(selectedUser)
 
   const handleCreateUserClose = () => {
     setShowCreateUserModal(false);

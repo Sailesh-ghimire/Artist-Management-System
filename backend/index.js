@@ -5,8 +5,9 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const artistRoutes = require('./routes/artistRoutes');
 const songRoutes = require('./routes/songRoutes');
-const pool = require('./db');
-
+const { exportArtistsToCSV, importArtistsFromCSV } = require('./controllers/artistController');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const app = express();
 
@@ -20,15 +21,8 @@ app.use('/api/artists', artistRoutes);
 app.use('/api/songs', songRoutes);
 
 
-app.get('/api/db-test', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()'); // Simple query to test the connection
-    res.json({ message: 'Database connection successful', time: result.rows[0] });
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ message: 'Database connection error', error: error.message });
-  }
-});
+app.get('/exportartists', exportArtistsToCSV);
+app.post('/importartists', upload.single('file'), importArtistsFromCSV);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
