@@ -28,10 +28,12 @@ const deleteSong = id => {
   return axios.delete(`${API_URL}/${id}`, { headers: authHeader() });
 };
 
-export default {
+const songService = {
   getSongsByArtist,
   createSong,
   updateSong,
   deleteSong,
   getSongsCount,
 };
+
+export default songService;

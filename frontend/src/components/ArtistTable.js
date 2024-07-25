@@ -15,11 +15,17 @@ const ArtistTable = () => {
     fetchData(currentPage);
   }, [currentPage]);
 
+  const formatDate = date => {
+    return new Date(date).toISOString().split('T')[0];
+  };
+
   const fetchData = async page => {
     try {
       const res = await artistService.getAllArtists(page);
       const enhancedData = res.data.artists.map(artist => ({
         ...artist,
+        dob: formatDate(artist.dob),
+
         deleteButton: (
           <button
             onClick={() => handleDeleteButtonClick(artist.id)}
@@ -154,7 +160,7 @@ const ArtistTable = () => {
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className='p-4 text-left text-sm font-medium border-b border-gray-500'
+                    className='p-4 text-center text-sm font-medium border-b border-gray-500'
                   >
                     {header.column.columnDef.header}
                   </th>
@@ -168,7 +174,7 @@ const ArtistTable = () => {
                 {row.getVisibleCells().map(cell => (
                   <td
                     key={cell.id}
-                    className='p-4 text-sm text-gray-200 border-b border-gray-600'
+                    className='p-4 text-center text-sm text-gray-200 border-b border-gray-600'
                   >
                     {cell.getValue()}
                   </td>

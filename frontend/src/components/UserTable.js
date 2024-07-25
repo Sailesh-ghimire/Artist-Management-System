@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import userService from '../services/userService';
 import CreateUser from './createUser';
@@ -10,21 +10,20 @@ const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-  const [userTableKey, setUserTableKey] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const handleCreateUserClose = () => {
     setShowCreateUserModal(false);
   };
 
-  useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage]);
-
+  const formatDate = date => {
+    return new Date(date).toISOString().split('T')[0];
+  };
   const fetchData = async page => {
     try {
       const res = await userService.getAllUsers(page);
       const enhancedData = res.data.users.map(user => ({
         ...user,
+        dob: formatDate(user.dob),
         deleteButton: (
           <button
             onClick={() => handleDeleteButtonClick(user.id)}
@@ -49,6 +48,10 @@ const UserTable = () => {
       toast.error('Failed to fetch users');
     }
   };
+
+  useEffect(() => {
+    fetchData(currentPage);
+  }, [currentPage, fetchData]);
 
   const handleDeleteButtonClick = async id => {
     try {
@@ -141,7 +144,7 @@ const UserTable = () => {
                 {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className='p-4 text-left text-sm font-medium border-b border-gray-500'
+                    className='p-4 text-center text-sm font-medium border-b border-gray-500'
                   >
                     {header.column.columnDef.header}
                   </th>
@@ -155,7 +158,7 @@ const UserTable = () => {
                 {row.getVisibleCells().map(cell => (
                   <td
                     key={cell.id}
-                    className='p-4 text-sm text-gray-200 border-b border-gray-600'
+                    className='p-4 text-center text-sm text-gray-200 border-b border-gray-600'
                   >
                     {cell.getValue()}
                   </td>

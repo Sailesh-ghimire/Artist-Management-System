@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import CreateUser from './createUser';
-import UserTable from './UserTable';
-import SongTable from './SongTable';
+import { Link } from 'react-router-dom';
 import userService from '../services/userService';
 import artistService from '../services/artistService';
 import songService from '../services/songService';
 import { toast, ToastContainer } from 'react-toastify';
 
 const Dashboard = () => {
-  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: null,
     totalArtists: null,

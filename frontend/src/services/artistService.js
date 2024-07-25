@@ -29,10 +29,12 @@ const getArtistSongs = artist_id => {
   return axios.get(API_URL + artist_id + '/songs', { headers: authHeader() });
 };
 
-export default {
+const artistService = {
   getAllArtists,
   createArtist,
   updateArtist,
   deleteArtist,
   getArtistSongs,
 };
+
+export default artistService;

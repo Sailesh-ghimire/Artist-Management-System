@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import artistService from '../services/artistService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useForm } from 'react-hook-form';
-import { z, ZodError } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateArtistSchema } from '../validations/allValidations';
 

@@ -28,9 +28,11 @@ const deleteUser = id => {
   return axios.delete(API_URL + id, { headers: authHeader() });
 };
 
-export default {
+const userService = {
   getAllUsers,
   createUser,
   updateUser,
   deleteUser,
 };
+
+export default userService;

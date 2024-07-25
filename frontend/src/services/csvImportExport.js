@@ -44,7 +44,9 @@ const csvImport = async file => {
   }
 };
 
-export default {
+const csvService = {
   csvExport,
   csvImport,
 };
+
+export default csvService;
