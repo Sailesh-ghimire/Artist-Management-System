@@ -3,7 +3,6 @@ const pool = require('../db');
 const csv = require('csv-parser');
 const fs = require('fs');
 
-
 exports.getAllArtists = async (req, res) => {
   try {
     const artists = await pool.query('SELECT * FROM artists');
@@ -13,7 +12,6 @@ exports.getAllArtists = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
-
 
 exports.getAllArtists = async (req, res) => {
   try {
@@ -27,22 +25,21 @@ exports.getAllArtists = async (req, res) => {
     }
 
     const countResult = await pool.query('SELECT COUNT(*) FROM artists');
-    
-    // Ensure countResult has rows and count is present
+
     if (!countResult.rows || countResult.rows.length === 0) {
       throw new Error('Unable to get artists count');
     }
 
     const totalArtists = countResult.rows[0].count;
     const totalPages = Math.ceil(totalArtists / limit);
-    
+
     const response = {
       artists: artists.rows,
       currentPage: parseInt(page),
       totalPages: totalPages,
-      count: parseInt(totalArtists), 
+      count: parseInt(totalArtists),
     };
-    
+
     res.json(response);
   } catch (err) {
     console.error('Error fetching artists:', err.message);
@@ -51,7 +48,14 @@ exports.getAllArtists = async (req, res) => {
 };
 
 exports.createArtist = async (req, res) => {
-  const { name, dob, gender, address, first_release_year, no_of_albums_released } = req.body;
+  const {
+    name,
+    dob,
+    gender,
+    address,
+    first_release_year,
+    no_of_albums_released,
+  } = req.body;
 
   try {
     const newArtist = await pool.query(
@@ -102,16 +106,15 @@ exports.getArtistSongs = async (req, res) => {
   const { artist_id } = req.params;
 
   try {
-    const songs = await pool.query('SELECT * FROM music WHERE artist_id = $1', [artist_id]);
+    const songs = await pool.query('SELECT * FROM music WHERE artist_id = $1', [
+      artist_id,
+    ]);
     res.json(songs.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 };
-
-
-
 
 exports.exportArtistsToCSV = async (req, res) => {
   try {
@@ -125,78 +128,61 @@ exports.exportArtistsToCSV = async (req, res) => {
         { id: 'address', title: 'Address' },
         { id: 'first_release_year', title: 'First Release Year' },
         { id: 'no_of_albums_released', title: 'No. of Albums Released' },
-      ]
+      ],
     });
-
 
     const formattedArtists = artists.rows.map(artist => ({
       ...artist,
-      dob: new Date(artist.dob).toISOString().split('T')[0], // Format to YYYY-MM-DD
+      dob: new Date(artist.dob).toISOString().split('T')[0],
     }));
 
-    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(formattedArtists);
+    const csvData =
+      csvStringifier.getHeaderString() +
+      csvStringifier.stringifyRecords(formattedArtists);
 
     res.header('Content-Type', 'text/csv');
     res.attachment('artists.csv');
-    // res.send(csvData);
     res.send(Buffer.from(csvData, 'utf8'));
-
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 };
 
-// exports.importArtistsFromCSV = async (req, res) => {
-//   try {
-
-//     const results = [];
-//     fs.createReadStream(req.file.path)
-//       .pipe(csv())
-//       .on('data', (data) => results.push(data))
-//       .on('end', async () => {
-//         try {
-//           const promises = results.map(artist => {
-//             return pool.query(
-//               'INSERT INTO artists (name, dob, gender, address, first_release_year, no_of_albums_released) VALUES ($1, $2, $3, $4, $5, $6)',
-//               [artist.name, artist.dob, artist.gender, artist.address, artist.first_release_year, artist.no_of_albums_released]
-//             );
-//           });
-//           await Promise.all(promises);
-//           res.send('Artists imported successfully');
-//         } catch (err) {
-//           console.error(err.message);
-//           res.status(500).send('Server error');
-//         }
-//       });
-//   } catch (err) {
-//     console.error(err.message);
-//     res.status(500).send('Server error');
-//   }
-// };
-
-
 exports.importArtistsFromCSV = async (req, res) => {
   try {
-    const file = req.file; // Assuming file is uploaded via multer
+    const file = req.file;
     const results = [];
 
     fs.createReadStream(file.path)
       .pipe(csv())
-      .on('data', (data) => results.push(data))
+      .on('data', data => results.push(data))
       .on('end', async () => {
-        // Process results
         for (const artist of results) {
-          const { Name, 'Date of Birth': dob, Gender: gender, Address: address, 'First Release Year': first_release_year, 'No. of Albums Released': no_of_albums_released } = artist;
-          
-          
+          const {
+            Name,
+            'Date of Birth': dob,
+            Gender: gender,
+            Address: address,
+            'First Release Year': first_release_year,
+            'No. of Albums Released': no_of_albums_released,
+          } = artist;
+
           const dobFormatted = dob ? new Date(dob).toISOString() : null;
           const firstReleaseYear = parseInt(first_release_year, 10) || null;
-          const noOfAlbumsReleased = parseInt(no_of_albums_released, 10) || null;
+          const noOfAlbumsReleased =
+            parseInt(no_of_albums_released, 10) || null;
 
           await pool.query(
             'INSERT INTO artists (name, dob, gender, address, first_release_year, no_of_albums_released) VALUES ($1, $2, $3, $4, $5, $6)',
-            [Name, dobFormatted, gender, address, firstReleaseYear, noOfAlbumsReleased]
+            [
+              Name,
+              dobFormatted,
+              gender,
+              address,
+              firstReleaseYear,
+              noOfAlbumsReleased,
+            ]
           );
         }
         res.send('Artists imported successfully');

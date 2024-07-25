@@ -1,7 +1,6 @@
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
 
-
 exports.getAllUsers = async (req, res) => {
   try {
     const { page = 1, limit = 5 } = req.query;
@@ -21,9 +20,9 @@ exports.getAllUsers = async (req, res) => {
       users: users.rows,
       currentPage: parseInt(page),
       totalPages: totalPages,
-      count: parseInt(totalUsers), 
+      count: parseInt(totalUsers),
     };
-    
+
     res.json(response);
   } catch (err) {
     console.error('Error fetching users:', err.message);
@@ -32,7 +31,16 @@ exports.getAllUsers = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { first_name, last_name, email, password, phone, dob, gender, address } = req.body;
+  const {
+    first_name,
+    last_name,
+    email,
+    password,
+    phone,
+    dob,
+    gender,
+    address,
+  } = req.body;
 
   try {
     const newUser = await pool.query(
@@ -45,22 +53,6 @@ exports.createUser = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
-
-// exports.updateUser = async (req, res) => {
-//   const { id } = req.params;
-//   const { first_name, last_name, email, phone, dob, gender, address } = req.body;
-
-//   try {
-//     const updatedUser = await pool.query(
-//       'UPDATE users SET first_name = $1, last_name = $2, email = $3, phone = $4, dob = $5, gender = $6, address = $7, updated_at = NOW() WHERE id = $8 RETURNING *',
-//       [first_name, last_name, email, phone, dob, gender, address, id]
-//     );
-//     res.json(updatedUser.rows[0]);
-//   } catch (err) {
-//     console.error(err.message);
-//     res.status(500).send('Server error');
-//   }
-// };
 
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
@@ -82,15 +74,12 @@ exports.updateUser = async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-
     res.json(updatedUser.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 };
-
-
 
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;

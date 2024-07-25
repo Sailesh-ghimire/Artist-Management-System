@@ -3,12 +3,12 @@ import { authHeader } from './auth-header';
 
 const API_URL = 'http://localhost:5000/api/auth/';
 
-const register = (user) => {
+const register = user => {
   return axios.post(API_URL + 'register', user);
 };
 
-const login = (user) => {
-  return axios.post(API_URL + 'login', user).then((response) => {
+const login = user => {
+  return axios.post(API_URL + 'login', user).then(response => {
     if (response.data.token) {
       localStorage.setItem('user', JSON.stringify(response.data));
     }
@@ -29,7 +29,7 @@ const verifyToken = async () => {
   if (user && user.token) {
     try {
       const response = await axios.get(API_URL + 'verify-token', {
-        headers: authHeader()
+        headers: authHeader(),
       });
       return response.data.valid;
     } catch (error) {
@@ -45,7 +45,7 @@ const authService = {
   login,
   logout,
   getCurrentUser,
-  verifyToken
+  verifyToken,
 };
 
 export default authService;

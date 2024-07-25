@@ -1,10 +1,10 @@
 module.exports = {
-  jwtSecret: "saileshghimire",
+  jwtSecret: 'saileshghimire',
   db: {
-    user: "postgres",
-    password: "password",
-    host: "localhost",
+    user: 'postgres',
+    password: 'password',
+    host: 'localhost',
     port: 5432,
-    database: "admin_panel",
+    database: 'admin_panel',
   },
 };

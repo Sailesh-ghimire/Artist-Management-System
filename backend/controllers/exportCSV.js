@@ -1,6 +1,6 @@
 const csvWriter = require('csv-writer').createObjectCsvStringifier;
 
-exports.  exportArtistsToCSV = async (req, res) => {
+exports.exportArtistsToCSV = async (req, res) => {
   try {
     const artists = await pool.query('SELECT * FROM artists');
     const csvStringifier = csvWriter({
@@ -12,10 +12,12 @@ exports.  exportArtistsToCSV = async (req, res) => {
         { id: 'address', title: 'Address' },
         { id: 'first_release_year', title: 'First Release Year' },
         { id: 'no_of_albums_released', title: 'No. of Albums Released' },
-      ]
+      ],
     });
 
-    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(artists.rows);
+    const csvData =
+      csvStringifier.getHeaderString() +
+      csvStringifier.stringifyRecords(artists.rows);
 
     res.header('Content-Type', 'text/csv');
     res.attachment('artists.csv');

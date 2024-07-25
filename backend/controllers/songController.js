@@ -1,11 +1,9 @@
 const pool = require('../db');
 
-
 exports.getSongsCount = async (req, res) => {
   try {
     const countResult = await pool.query('SELECT COUNT(*) FROM music');
-    
-    // Ensure countResult has rows and count is present
+
     if (!countResult.rows || countResult.rows.length === 0) {
       throw new Error('Unable to get songs count');
     }
@@ -18,7 +16,6 @@ exports.getSongsCount = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
-
 
 exports.createSong = async (req, res) => {
   const { artist_id, title, album_name, genre } = req.body;

@@ -4,10 +4,21 @@ const pool = require('../db');
 const config = require('../config');
 
 exports.register = async (req, res) => {
-  const { first_name, last_name, email, password, phone, dob, gender, address } = req.body;
+  const {
+    first_name,
+    last_name,
+    email,
+    password,
+    phone,
+    dob,
+    gender,
+    address,
+  } = req.body;
 
   try {
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [
+      email,
+    ]);
 
     if (user.rows.length > 0) {
       return res.status(400).json({ msg: 'User already exists' });
@@ -18,7 +29,16 @@ exports.register = async (req, res) => {
 
     const newUser = await pool.query(
       'INSERT INTO users (first_name, last_name, email, password, phone, dob, gender, address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-      [first_name, last_name, email, hashedPassword, phone, dob, gender, address]
+      [
+        first_name,
+        last_name,
+        email,
+        hashedPassword,
+        phone,
+        dob,
+        gender,
+        address,
+      ]
     );
 
     res.json(newUser.rows[0]);
@@ -32,7 +52,9 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [
+      email,
+    ]);
 
     if (user.rows.length === 0) {
       return res.status(400).json({ msg: 'Invalid credentials' });

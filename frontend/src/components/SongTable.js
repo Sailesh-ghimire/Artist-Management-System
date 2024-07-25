@@ -16,25 +16,18 @@ const ArtistSongsTable = () => {
     setShowCreateSongModal(false);
   };
 
-  const handleArtistCreated = () => {
-    // Trigger a re-render of UserTable by changing its key
-    // fetchData(currentPage);
-  };
-
-  const { id: artistId } = useParams(); // Extracting artistId from the URL
-
+  const { id: artistId } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await artistService.getArtistSongs(artistId);
-console.log(res.data)
-        const enhancedData = res.data.map((song) => ({
+        const enhancedData = res.data.map(song => ({
           ...song,
           deleteButton: (
             <button
               onClick={() => handleDeleteButtonClick(song.id)}
-              className="p-1 hover:bg-red-600 border border-red-600 rounded"
+              className='p-1 hover:bg-red-600 border border-red-600 rounded'
             >
               Delete
             </button>
@@ -42,13 +35,12 @@ console.log(res.data)
           updateButton: (
             <button
               onClick={() => handleUpdateButtonClick(song.id)}
-              className="p-1 hover:bg-blue-600 border border-blue-600 rounded"
+              className='p-1 hover:bg-blue-600 border border-blue-600 rounded'
             >
               Update
             </button>
           ),
         }));
-console.log(enhancedData)
 
         setData(enhancedData);
       } catch (error) {
@@ -60,23 +52,20 @@ console.log(enhancedData)
     fetchData();
   }, [artistId]);
 
-  const handleDeleteButtonClick = async (id) => {
+  const handleDeleteButtonClick = async id => {
     try {
       await songService.deleteSong(id);
     } catch (error) {
-      console.error("Failed to delete artist:", error);
+      console.error('Failed to delete artist:', error);
     }
   };
 
   const [selectedSong, setSelectedSong] = useState(null);
 
-  const handleUpdateButtonClick = (id) => {
+  const handleUpdateButtonClick = id => {
     setSelectedSong(id);
   };
 
-
-
-  // Define columns
   const columns = React.useMemo(
     () => [
       { accessorKey: 'id', header: 'ID' },
@@ -86,40 +75,34 @@ console.log(enhancedData)
       { accessorKey: 'created_at', header: 'Created At' },
       { accessorKey: 'updated_at', header: 'Updated At' },
       {
-        accessorKey: "deleteButton",
-        header: "Actions",
-        cell: (props) => props.value,
+        accessorKey: 'deleteButton',
+        header: 'Actions',
+        cell: props => props.value,
       },
       {
-        accessorKey: "updateButton",
-        header: "Actions",
-        cell: (props) => props.value,
+        accessorKey: 'updateButton',
+        header: 'Actions',
+        cell: props => props.value,
       },
     ],
     []
   );
 
-  // Initialize the table
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-
-
-  const handleSongCreated = () => {
-    // Trigger a re-render of UserTable by changing its key
-console.log('refetch')  };
-
+  const handleSongCreated = () => {};
 
   return (
-    <div className="p-6 bg-gray-900 min-h-screen">
-      <h2 className="text-3xl font-bold text-white mb-6">Songs</h2>
+    <div className='p-6 bg-gray-900 min-h-screen'>
+      <h2 className='text-3xl font-bold text-white mb-6'>Songs</h2>
 
       <button
         onClick={() => setShowCreateSongModal(true)}
-        className="mb-6 px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+        className='mb-6 px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300'
       >
         Create Song
       </button>
@@ -129,25 +112,23 @@ console.log('refetch')  };
           onSubmit={handleSongCreated}
         />
       )}
-  
 
-  {selectedSong && (
+      {selectedSong && (
         <UpdateSong
           songId={selectedSong}
           onClose={() => setSelectedSong(null)}
         />
       )}
 
-
-      <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
-        <table className="min-w-full bg-gray-700 border border-gray-600 rounded-lg">
+      <div className='overflow-x-auto bg-gray-800 rounded-lg shadow-lg'>
+        <table className='min-w-full bg-gray-700 border border-gray-600 rounded-lg'>
           <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-gray-600 text-white">
-                {headerGroup.headers.map((header) => (
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id} className='bg-gray-600 text-white'>
+                {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
-                    className="p-4 text-left text-sm font-medium border-b border-gray-500"
+                    className='p-4 text-left text-sm font-medium border-b border-gray-500'
                   >
                     {header.column.columnDef.header}
                   </th>
@@ -156,12 +137,12 @@ console.log('refetch')  };
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-600">
-                {row.getVisibleCells().map((cell) => (
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className='hover:bg-gray-600'>
+                {row.getVisibleCells().map(cell => (
                   <td
                     key={cell.id}
-                    className="p-4 text-sm text-gray-200 border-b border-gray-600"
+                    className='p-4 text-sm text-gray-200 border-b border-gray-600'
                   >
                     {cell.getValue()}
                   </td>
@@ -171,8 +152,7 @@ console.log('refetch')  };
           </tbody>
         </table>
       </div>
-  
-      
+
       <ToastContainer />
     </div>
   );

@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.get('/verify-token', authMiddleware, (req, res) => {
-    res.json({ valid: true });
-  });
+  res.json({ valid: true });
+});
 
 module.exports = router;
