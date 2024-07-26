@@ -21,7 +21,9 @@ const Register = () => {
     try {
       await authService.register(data);
       toast.success('Registration successful!');
-      navigate('/login');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
       console.error(err);
       toast.error('Registration failed!');
@@ -47,7 +49,7 @@ const Register = () => {
                 type='text'
                 id='firstName'
                 placeholder='First Name'
-                {...register('firstName')}
+                {...register('first_name')}
                 className={`border ${
                   errors.firstName ? 'border-red-600' : 'border-gray-600'
                 } bg-gray-700 text-white p-2 rounded w-full`}
@@ -69,7 +71,7 @@ const Register = () => {
                 type='text'
                 id='lastName'
                 placeholder='Last Name'
-                {...register('lastName')}
+                {...register('last_name')}
                 className={`border ${
                   errors.lastName ? 'border-red-600' : 'border-gray-600'
                 } bg-gray-700 text-white p-2 rounded w-full`}

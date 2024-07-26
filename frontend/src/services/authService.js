@@ -4,7 +4,13 @@ import { authHeader } from './auth-header';
 const API_URL = 'http://localhost:5000/api/auth/';
 
 const register = user => {
-  return axios.post(API_URL + 'register', user);
+  try {
+    const response = axios.post(API_URL + 'register', user);
+    return response.data;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
 };
 
 const login = user => {
