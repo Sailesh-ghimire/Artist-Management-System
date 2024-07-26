@@ -5,12 +5,116 @@ import CreateUser from './createUser';
 import UpdateUser from './updateUser';
 import { ToastContainer, toast } from 'react-toastify';
 
+// const UserTable = () => {
+//   const [data, setData] = useState([]);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalPages, setTotalPages] = useState(1);
+//   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+//   const [selectedUser, setSelectedUser] = useState(null);
+//   const handleCreateUserClose = () => {
+//     setShowCreateUserModal(false);
+//   };
+
+//   const formatDate = date => {
+//     return new Date(date).toISOString().split('T')[0];
+//   };
+//   const fetchData = async page => {
+//     try {
+//       const res = await userService.getAllUsers(page);
+//       const enhancedData = res.data.users.map(user => ({
+//         ...user,
+//         dob: formatDate(user.dob),
+//         deleteButton: (
+//           <button
+//             onClick={() => handleDeleteButtonClick(user.id)}
+//             className='p-1  border hover:bg-red-600 border-red-600 rounded'
+//           >
+//             Delete
+//           </button>
+//         ),
+//         updateButton: (
+//           <button
+//             onClick={() => handleUpdateButtonClick(user.id)}
+//             className='p-1  border hover:bg-blue-600 border-blue-600 rounded'
+//           >
+//             Update
+//           </button>
+//         ),
+//       }));
+//       setData(enhancedData);
+//       setTotalPages(res.data.totalPages);
+//     } catch (error) {
+//       console.error('Failed to fetch users:', error);
+//       toast.error('Failed to fetch users');
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchData(currentPage);
+//   }, [currentPage, fetchData]);
+
+//   const handleDeleteButtonClick = async id => {
+//     try {
+//       await userService.deleteUser(id);
+//       fetchData(currentPage);
+//     } catch (error) {
+//       console.error('Failed to delete user:', error);
+//     }
+//   };
+
+//   const handleUpdateButtonClick = id => {
+//     setSelectedUser(id);
+//     fetchData(currentPage);
+//   };
+
+//   const columns = React.useMemo(
+//     () => [
+//       { accessorKey: 'id', header: 'ID' },
+//       { accessorKey: 'first_name', header: 'First Name' },
+//       { accessorKey: 'last_name', header: 'Last Name' },
+//       { accessorKey: 'email', header: 'Email' },
+//       { accessorKey: 'phone', header: 'Phone' },
+//       { accessorKey: 'dob', header: 'Date of Birth' },
+//       { accessorKey: 'gender', header: 'Gender' },
+//       {
+//         accessorKey: 'deleteButton',
+//         header: 'Actions',
+//         cell: props => props.value,
+//       },
+//       {
+//         accessorKey: 'updateButton',
+//         header: 'Actions',
+//         cell: props => props.value,
+//       },
+//     ],
+//     []
+//   );
+
+//   const table = useReactTable({
+//     data,
+//     columns,
+//     getCoreRowModel: getCoreRowModel(),
+//   });
+
+//   const nextPage = () => {
+//     setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+//   };
+
+//   const prevPage = () => {
+//     setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+//   };
+
+//   const handleUserCreated = () => {
+//     fetchData(currentPage);
+//   };
+
 const UserTable = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
   const handleCreateUserClose = () => {
     setShowCreateUserModal(false);
   };
@@ -18,7 +122,10 @@ const UserTable = () => {
   const formatDate = date => {
     return new Date(date).toISOString().split('T')[0];
   };
-  const fetchData = async page => {
+
+  const fetchData = useCallback(async page => {
+    console.log('Fetching data for page:', page); // Debug log
+
     try {
       const res = await userService.getAllUsers(page);
       const enhancedData = res.data.users.map(user => ({
@@ -27,7 +134,7 @@ const UserTable = () => {
         deleteButton: (
           <button
             onClick={() => handleDeleteButtonClick(user.id)}
-            className='p-1  border hover:bg-red-600 border-red-600 rounded'
+            className='p-1 border hover:bg-red-600 border-red-600 rounded'
           >
             Delete
           </button>
@@ -35,7 +142,7 @@ const UserTable = () => {
         updateButton: (
           <button
             onClick={() => handleUpdateButtonClick(user.id)}
-            className='p-1  border hover:bg-blue-600 border-blue-600 rounded'
+            className='p-1 border hover:bg-blue-600 border-blue-600 rounded'
           >
             Update
           </button>
@@ -47,9 +154,11 @@ const UserTable = () => {
       console.error('Failed to fetch users:', error);
       toast.error('Failed to fetch users');
     }
-  };
+  }, []);
 
   useEffect(() => {
+    console.log('useEffect called'); // Debug log
+
     fetchData(currentPage);
   }, [currentPage, fetchData]);
 
@@ -59,6 +168,7 @@ const UserTable = () => {
       fetchData(currentPage);
     } catch (error) {
       console.error('Failed to delete user:', error);
+      toast.error('Failed to delete user');
     }
   };
 
