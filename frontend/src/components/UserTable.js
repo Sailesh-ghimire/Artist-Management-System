@@ -12,21 +12,36 @@ const UserTable = () => {
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleCreateUserClose = () => {
-    setShowCreateUserModal(false);
-  };
+  const handleDeleteButtonClick = useCallback(
+    async id => {
+      try {
+        await userService.deleteUser(id);
+        fetchData(currentPage);
+        toast.success('deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPage]
+  );
 
-  const formatDate = useCallback(date => {
-    return new Date(date).toISOString().split('T')[0];
-  }, []);
+  const handleUpdateButtonClick = useCallback(
+    id => {
+      setSelectedUser(id);
+      fetchData(currentPage);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPage]
+  );
 
   const fetchData = useCallback(
     async page => {
       try {
         const res = await userService.getAllUsers(page);
-        const enhancedData = res.data.users.map(user => ({
+        const formattedData = res.data.users.map(user => ({
           ...user,
-          dob: formatDate(user.dob),
+          dob: new Date(user.dob).toISOString().split('T')[0],
           deleteButton: (
             <button
               onClick={() => handleDeleteButtonClick(user.id)}
@@ -44,39 +59,25 @@ const UserTable = () => {
             </button>
           ),
         }));
-        setData(enhancedData);
+        setData(formattedData);
         setTotalPages(res.data.totalPages);
       } catch (error) {
         console.error('Failed to fetch users:', error);
         toast.error('Failed to fetch users');
       }
     },
-    [formatDate]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [handleDeleteButtonClick, handleUpdateButtonClick]
   );
 
   useEffect(() => {
     fetchData(currentPage);
   }, [currentPage, fetchData]);
 
-  const handleDeleteButtonClick = useCallback(
-    async id => {
-      try {
-        await userService.deleteUser(id);
-        fetchData(currentPage);
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-      }
-    },
-    [currentPage, fetchData]
-  );
-
-  const handleUpdateButtonClick = useCallback(
-    id => {
-      setSelectedUser(id);
-      fetchData(currentPage);
-    },
-    [currentPage, fetchData]
-  );
+  const handleUserCreated = useCallback(() => {
+    fetchData(currentPage);
+    setShowCreateUserModal(false);
+  }, [currentPage, fetchData]);
 
   const columns = React.useMemo(
     () => [
@@ -107,17 +108,8 @@ const UserTable = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const nextPage = () => {
-    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-  };
-
-  const prevPage = () => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-  };
-
-  const handleUserCreated = useCallback(() => {
-    fetchData(currentPage);
-  }, [currentPage, fetchData]);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   return (
     <div className='p-6 bg-gray-900 min-h-screen'>
@@ -134,7 +126,7 @@ const UserTable = () => {
       {showCreateUserModal && (
         <div className='fixed inset-0 z-50 flex items-center justify-center'>
           <CreateUser
-            onClose={handleCreateUserClose}
+            onClose={() => setShowCreateUserModal(false)}
             onSubmit={handleUserCreated}
           />
         </div>
@@ -144,6 +136,7 @@ const UserTable = () => {
         <UpdateUser
           userId={selectedUser}
           onClose={() => setSelectedUser(null)}
+          onSubmit={() => fetchData(currentPage)}
         />
       )}
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import artistService from '../services/artistService';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -21,6 +21,7 @@ const CreateArtist = ({ onClose, onSubmit }) => {
       toast.success('Artist created successfully');
       onClose();
       onSubmit();
+      toast.success(' Successful');
     } catch (err) {
       console.error(err);
       toast.error('Failed to create artist');
@@ -177,7 +178,7 @@ const CreateArtist = ({ onClose, onSubmit }) => {
             </button>
           </div>
         </form>
-        <ToastContainer />
+        {/* <ToastContainer /> */}
       </div>
     </div>
   );

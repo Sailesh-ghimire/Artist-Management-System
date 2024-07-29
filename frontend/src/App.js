@@ -17,6 +17,9 @@ import ArtistTable from './components/ArtistTable';
 import Navbar from './components/Navbar';
 import SongTable from './components/SongTable';
 import ArtistCSVImportExport from './components/CSV';
+import ErrorPage from './components/ErrorPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   const [tokenChecked, setTokenChecked] = useState(false);
@@ -43,12 +46,23 @@ const App = () => {
 
   return (
     <Router>
+      {/* <ToastContainer /> */}
+      <ToastContainer
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        // pauseOnHover
+      />
       <MainApp isAuthenticated={isAuthenticated} />
     </Router>
   );
 };
 
-const MainApp = ({ isAuthenticated }) => {
+const MainApp = () => {
   const location = useLocation();
   const showNavbar = !['/login', '/register'].includes(location.pathname);
 
@@ -75,6 +89,7 @@ const MainApp = ({ isAuthenticated }) => {
           path='/csv'
           element={<PrivateRoute element={<ArtistCSVImportExport />} />}
         />
+        <Route path='*' element={<ErrorPage />} />
       </Routes>
     </div>
   );

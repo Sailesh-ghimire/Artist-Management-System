@@ -1,6 +1,6 @@
 import React from 'react';
 import userService from '../services/userService';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { registerSchema } from '../validations/allValidations';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,8 +19,10 @@ const CreateUser = ({ onClose, onSubmit }) => {
     try {
       await userService.createUser(data);
       toast.success('User created successfully');
-      onClose();
       onSubmit();
+
+      onClose();
+      toast.success('successful');
     } catch (err) {
       console.error(err);
       toast.error('Failed to create user');
@@ -215,7 +217,7 @@ const CreateUser = ({ onClose, onSubmit }) => {
           </button>
         </div>
       </form>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 };

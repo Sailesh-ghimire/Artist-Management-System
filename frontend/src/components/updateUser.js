@@ -1,6 +1,6 @@
 import React from 'react';
 import userService from '../services/userService';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -91,7 +91,7 @@ const UpdateUser = ({ userId, onClose, onSubmit }) => {
             </button>
           </div>
         </form>
-        <ToastContainer />
+        {/* <ToastContainer /> */}
       </div>
     </div>
   );

@@ -1,80 +1,97 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import artistService from '../services/artistService';
 import { Link } from 'react-router-dom';
 import CreateArtist from './createArtist';
 import UpdateArtist from './updateArtist';
+import { toast, ToastContainer } from 'react-toastify';
 
 const ArtistTable = () => {
   const [data, setData] = useState([]);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [showCreateArtistModal, setShowCreateArtistModal] = useState(false);
+
+  const handleDeleteButtonClick = useCallback(
+    async id => {
+      try {
+        await artistService.deleteArtist(id);
+        fetchData(currentPage);
+        toast.success('Delete Successful');
+      } catch (error) {
+        console.error('Failed to delete artist:', error);
+        toast.error('Failed to delete artist');
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPage]
+  );
+
+  const handleUpdateButtonClick = useCallback(
+    id => {
+      setSelectedArtist(id);
+      fetchData(currentPage);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPage]
+  );
+
+  const fetchData = useCallback(
+    async page => {
+      try {
+        const res = await artistService.getAllArtists(page);
+        const formattedData = res.data.artists.map(artist => ({
+          ...artist,
+          dob: new Date(artist.dob).toISOString().split('T')[0],
+          deleteButton: (
+            <button
+              onClick={() => handleDeleteButtonClick(artist.id)}
+              className='p-1 hover:bg-red-600 border border-red-600 rounded'
+            >
+              Delete
+            </button>
+          ),
+          updateButton: (
+            <button
+              onClick={() => handleUpdateButtonClick(artist.id)}
+              className='p-1 hover:bg-blue-600 border border-blue-600 rounded'
+            >
+              Update
+            </button>
+          ),
+          songsButton: (
+            <Link to={`/songs/${artist.id}`}>
+              <button className='p-1 hover:bg-blue-500 text-white rounded'>
+                View Songs
+              </button>
+            </Link>
+          ),
+        }));
+        setData(formattedData);
+        setTotalPages(res.data.totalPages);
+      } catch (error) {
+        console.error('Failed to fetch artists:', error);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [handleDeleteButtonClick, handleUpdateButtonClick]
+  );
 
   useEffect(() => {
     fetchData(currentPage);
-  }, [currentPage]);
+  }, [currentPage, fetchData]);
 
-  const formatDate = date => {
-    return new Date(date).toISOString().split('T')[0];
-  };
-
-  const fetchData = async page => {
-    try {
-      const res = await artistService.getAllArtists(page);
-      const enhancedData = res.data.artists.map(artist => ({
-        ...artist,
-        dob: formatDate(artist.dob),
-
-        deleteButton: (
-          <button
-            onClick={() => handleDeleteButtonClick(artist.id)}
-            className='p-1 hover:bg-red-600 border border-red-600 rounded'
-          >
-            Delete
-          </button>
-        ),
-        updateButton: (
-          <button
-            onClick={() => handleUpdateButtonClick(artist.id)}
-            className='p-1 hover:bg-blue-600 border border-blue-600 rounded'
-          >
-            Update
-          </button>
-        ),
-        songsButton: (
-          <Link to={`/songs/${artist.id}`}>
-            <button className='p-1 hover:bg-blue-500 text-white rounded'>
-              View Songs
-            </button>
-          </Link>
-        ),
-      }));
-      setData(enhancedData);
-      setTotalPages(res.data.totalPages);
-    } catch (error) {
-      console.error('Failed to fetch artists:', error);
-    }
-  };
-
-  const handleDeleteButtonClick = async id => {
-    try {
-      await artistService.deleteArtist(id);
-      fetchData(currentPage);
-    } catch (error) {
-      console.error('Failed to delete artist:', error);
-    }
-  };
-
-  const [selectedArtist, setSelectedArtist] = useState(null);
-
-  const handleUpdateButtonClick = id => {
-    setSelectedArtist(id);
+  const handleArtistCreated = useCallback(() => {
     fetchData(currentPage);
-  };
+    toast.success(' Successful');
+
+    setShowCreateArtistModal(false);
+  }, [currentPage, fetchData]);
 
   const columns = React.useMemo(
     () => [
+      { accessorKey: 'id', header: 'ID' },
       { accessorKey: 'name', header: 'Name' },
       { accessorKey: 'dob', header: 'DOB' },
       { accessorKey: 'gender', header: 'Gender' },
@@ -94,7 +111,6 @@ const ArtistTable = () => {
         header: 'Actions',
         cell: props => props.value,
       },
-
       {
         accessorKey: 'songsButton',
         header: 'Songs By Artists',
@@ -110,25 +126,13 @@ const ArtistTable = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const nextPage = () => {
+  const nextPage = () =>
     setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-  };
-
-  const prevPage = () => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-  };
-
-  const [showCreateArtistModal, setShowCreateArtistModal] = useState(false);
-  const handleCreateArtistClose = () => {
-    setShowCreateArtistModal(false);
-  };
-
-  const handleArtistCreated = () => {
-    fetchData(currentPage);
-  };
+  const prevPage = () => setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
 
   return (
     <div className='p-6 bg-gray-900 min-h-screen'>
+      <ToastContainer />
       <h2 className='text-3xl font-bold text-white mb-6'>Artists</h2>
 
       <button
@@ -140,7 +144,7 @@ const ArtistTable = () => {
 
       {showCreateArtistModal && (
         <CreateArtist
-          onClose={handleCreateArtistClose}
+          onClose={() => setShowCreateArtistModal(false)}
           onSubmit={handleArtistCreated}
         />
       )}
@@ -149,6 +153,7 @@ const ArtistTable = () => {
         <UpdateArtist
           artistId={selectedArtist}
           onClose={() => setSelectedArtist(null)}
+          onSubmit={() => fetchData(currentPage)}
         />
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import songService from '../services/songService';
 
@@ -24,9 +24,9 @@ const CreateSong = ({ onClose, onSubmit }) => {
     };
     try {
       await songService.createSong(songData);
+      toast.success('Song created successfully.');
       onSubmit(songData);
       onClose();
-      toast.success('Song created successfully.');
     } catch (error) {
       toast.error('Error creating song.');
     }
@@ -117,7 +117,7 @@ const CreateSong = ({ onClose, onSubmit }) => {
             </button>
           </div>
         </form>
-        <ToastContainer />
+        {/* <ToastContainer /> */}
       </div>
     </div>
   );

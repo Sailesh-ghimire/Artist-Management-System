@@ -1,12 +1,12 @@
 import React from 'react';
 import artistService from '../services/artistService';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateArtistSchema } from '../validations/allValidations';
 
-const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
+const UpdateArtist = ({ artistId, onClose, onSubmit }) => {
   const {
     register,
     handleSubmit,
@@ -15,12 +15,12 @@ const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
     resolver: zodResolver(updateArtistSchema),
   });
 
-  const onSubmit = async data => {
+  const onSubmitHandler = async data => {
     try {
       await artistService.updateArtist(artistId, data);
       toast.success('Artist updated successfully');
       onClose();
-      onUpdate();
+      onSubmit();
     } catch (err) {
       console.error(err);
       toast.error('Failed to update artist');
@@ -33,7 +33,7 @@ const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
         <h2 className='text-2xl font-bold text-white mb-6 text-center'>
           Update Artist
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={handleSubmit(onSubmitHandler)} className='space-y-4'>
           <div className='mb-4'>
             <label
               htmlFor='no_of_albums_released'
@@ -75,7 +75,7 @@ const UpdateArtist = ({ artistId, onClose, onUpdate }) => {
           </div>
         </form>
       </div>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 };

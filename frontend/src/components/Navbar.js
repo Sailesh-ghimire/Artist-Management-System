@@ -15,7 +15,7 @@ const Navbar = () => {
       <div className='container mx-auto flex justify-between items-center'>
         <div className='text-white text-2xl font-bold'>
           <Link to='/' className='hover:text-blue-400 transition duration-300'>
-            AMS
+            HOME
           </Link>
         </div>
         <div className='flex items-center space-x-6'>

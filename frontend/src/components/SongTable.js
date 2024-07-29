@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import artistService from '../services/artistService';
 import { ToastContainer, toast } from 'react-toastify';
@@ -10,16 +10,12 @@ import UpdateSong from './updateSong';
 
 const ArtistSongsTable = () => {
   const [data, setData] = useState([]);
-
   const [showCreateSongModal, setShowCreateSongModal] = useState(false);
-  const handleCreateSongClose = () => {
-    setShowCreateSongModal(false);
-  };
-
+  const [selectedSong, setSelectedSong] = useState(null);
   const { id: artistId } = useParams();
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = useCallback(
+    async () => {
       try {
         const res = await artistService.getArtistSongs(artistId);
         const enhancedData = res.data.map(song => ({
@@ -41,31 +37,43 @@ const ArtistSongsTable = () => {
             </button>
           ),
         }));
-
         setData(enhancedData);
       } catch (error) {
         console.error("Failed to fetch artist's songs:", error);
         toast.error("Failed to fetch artist's songs");
       }
-    };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [artistId]
+  );
 
+  useEffect(() => {
     fetchData();
-  }, [artistId]);
+  }, [fetchData]);
 
-  const handleDeleteButtonClick = async id => {
-    try {
-      await songService.deleteSong(id);
-    } catch (error) {
-      console.error('Failed to delete artist:', error);
-    }
-  };
-
-  const [selectedSong, setSelectedSong] = useState(null);
+  const handleDeleteButtonClick = useCallback(
+    async id => {
+      try {
+        await songService.deleteSong(id);
+        fetchData();
+        toast.success(' Successful');
+      } catch (error) {
+        console.error('Failed to delete artist:', error);
+        toast.error('Failed to delete artist');
+      }
+    },
+    [fetchData]
+  );
 
   const handleUpdateButtonClick = id => {
     setSelectedSong(id);
   };
+  const handleCreateSongClose = () => {
+    fetchData();
+    toast.success(' Successful');
 
+    setShowCreateSongModal(false);
+  };
   const columns = React.useMemo(
     () => [
       { accessorKey: 'id', header: 'ID' },
@@ -98,6 +106,7 @@ const ArtistSongsTable = () => {
 
   return (
     <div className='p-6 bg-gray-900 min-h-screen'>
+      <ToastContainer />
       <h2 className='text-3xl font-bold text-white mb-6'>Songs</h2>
 
       <button
@@ -117,6 +126,7 @@ const ArtistSongsTable = () => {
         <UpdateSong
           songId={selectedSong}
           onClose={() => setSelectedSong(null)}
+          onUpdate={fetchData}
         />
       )}
 
